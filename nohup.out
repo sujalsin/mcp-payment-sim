@@ -1,0 +1,42 @@
+
+
+╭──────────────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│                         ▄▀▀ ▄▀█ █▀▀ ▀█▀ █▀▄▀█ █▀▀ █▀█                        │
+│                         █▀  █▀█ ▄▄█  █  █ ▀ █ █▄▄ █▀▀                        │
+│                                                                              │
+│                                FastMCP 2.14.1                                │
+│                                                                              │
+│                                                                              │
+│                   🖥  Server name: payments-simulator                         │
+│                                                                              │
+│                   📦 Transport:   SSE                                        │
+│                   🔗 Server URL:  http://0.0.0.0:8765/sse                    │
+│                                                                              │
+│                   📚 Docs:        https://gofastmcp.com                      │
+│                   🚀 Hosting:     https://fastmcp.cloud                      │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+
+[12/18/25 06:54:02] INFO     Starting MCP server                  server.py:2618
+                             'payments-simulator' with transport                
+                             'sse' on http://0.0.0.0:8765/sse                   
+INFO:     Started server process [37277]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8765 (Press CTRL+C to quit)
+INFO:     98.33.74.105:59855 - "GET /sse HTTP/1.1" 200 OK
+INFO:     98.33.74.105:59856 - "GET /.well-known/oauth-authorization-server HTTP/1.1" 404 Not Found
+INFO:     98.33.74.105:59856 - "POST /sse HTTP/1.1" 405 Method Not Allowed
+INFO:     98.33.74.105:59856 - "GET /sse HTTP/1.1" 200 OK
+INFO:     98.33.74.105:60814 - "GET /sse HTTP/1.1" 200 OK
+INFO:     98.33.74.105:60815 - "GET /.well-known/oauth-authorization-server HTTP/1.1" 404 Not Found
+INFO:     98.33.74.105:60815 - "POST /sse HTTP/1.1" 405 Method Not Allowed
+INFO:     98.33.74.105:60815 - "GET /sse HTTP/1.1" 200 OK
+INFO:     98.33.74.105:60816 - "POST /messages/?session_id=fcdeeb689794436783c1dee39568c4ec HTTP/1.1" 202 Accepted
+INFO:     98.33.74.105:60816 - "POST /messages/?session_id=fcdeeb689794436783c1dee39568c4ec HTTP/1.1" 202 Accepted
+INFO:     98.33.74.105:60819 - "POST /messages/?session_id=fcdeeb689794436783c1dee39568c4ec HTTP/1.1" 202 Accepted
+INFO:     98.33.74.105:60817 - "POST /messages/?session_id=fcdeeb689794436783c1dee39568c4ec HTTP/1.1" 202 Accepted
+INFO:     98.33.74.105:60818 - "POST /messages/?session_id=fcdeeb689794436783c1dee39568c4ec HTTP/1.1" 202 Accepted
+INFO:     98.33.74.105:60848 - "POST /messages/?session_id=fcdeeb689794436783c1dee39568c4ec HTTP/1.1" 202 Accepted

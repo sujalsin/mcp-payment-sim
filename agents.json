@@ -1,0 +1,25 @@
+{
+  "agents": [
+    {
+      "id": "finance_agent_001",
+      "name": "Finance Agent",
+      "role": "primary_approver",
+      "trust_score": 0.95,
+      "voting_rule": "approves_if_under_10000"
+    },
+    {
+      "id": "compliance_agent_002",
+      "name": "Compliance Agent",
+      "role": "secondary_approver",
+      "trust_score": 0.88,
+      "voting_rule": "reviews_unknown_merchants"
+    },
+    {
+      "id": "audit_agent_003",
+      "name": "Audit Agent",
+      "role": "reviewer",
+      "trust_score": 0.90,
+      "voting_rule": "reviews_if_over_500"
+    }
+  ]
+}
