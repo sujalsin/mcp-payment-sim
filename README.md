@@ -1,85 +1,83 @@
 # MCP Payments Simulator
 
-Built to prototype agentic payment infrastructure with multi-agent consensus and fraud scoring.
+A high-fidelity prototype of agentic payment infrastructure, featuring multi-agent consensus voting, adaptive fraud detection, and cryptographic model integrity verification.
 
-## Architecture
+## Architecture & Detection Strategy
 
-- **MCP Server**: 7 tools accessible via Claude
-- **Consensus Engine**: 3-agent Byzantine voting (67%/80% threshold based on amount)
-- **Fraud Detection**: Rule-based scoring (amount/time/merchant/anomaly)
-- **Storage**: SQLite for mandates and transactions
+The **MCP Payments Simulator** utilizes a layered security model to protect agentic payment workflows.
 
-## Quick Start
+### 1. Multi-Agent Consensus (Byzantine Resistance)
+Transactions are evaluated by a committee of specialized agents (Finance, Compliance, Audit). Higher-risk transactions require higher consensus thresholds:
+- **Auto-approve**: < $100
+- **Standard Majority (2/3)**: $100 - $1,000
+- **Supermajority (3/3)**: > $1,000
+
+### 2. Phase 2: Dual-Signal Adaptive Integrity
+To mitigate the **Rigidity Problem** of static baselines (where legitimate evolution triggers 25% False Positives), Phase 2 implements a dual-signal detection logic:
+
+1.  **Adaptive Behavioral Signal**: Uses an **Exponentially Weighted Moving Average (EWMA)** to allow the baseline to drift with legitimate behavioral changes.
+2.  **Cryptographic Integrity Signal**: Verifies the SHA-256 hash of agent model weights.
+
+**Decision Matrix:**
+| Behavioral Anomaly | Hash Tampered | Action | Confidence |
+| :--- | :--- | :--- | :--- |
+| **Yes** | **Yes** | `REVOKE` | High (Strong Signal) |
+| **Yes** | **No** | `HOLD_ALERT` | Medium (Legitimate Evolution?) |
+| **No** | **Yes** | `IGNORE` | Low (Model change, no drift) |
+| **No** | **No** | `APPROVE` | High (Normal Operation) |
+
+## Performance Dashboard
+
+Phase 2 significantly improves detection accuracy and reduces operational noise.
+
+![Phase 2 Metrics Dashboard](file:///home/sujals2144/natural/tests/phase2_metrics_dashboard.png)
+
+## Research Gap: Temporal Poisoning
+
+While Phase 2 eliminates False Positives during behavioral evolution, it reveals a critical research gap: **Temporal Poisoning**.
+
+A sophisticated attacker can gradually shift agent behavior (e.g., a 1.004x multiplier per transaction) to elevate the baseline without triggering the 50% drift threshold or requiring weight tampering.
+
+**Realistic Production Metrics:**
+| Attack Pattern | Volume | Detection | Missed |
+| :--- | :--- | :--- | :--- |
+| Sudden (6x jump) | 30% | 100% | 0% |
+| Fast drift (1.02x/tx) | 40% | 100% | 0% |
+| Temporal Poison (1.004x) | 30% | 20% | 80% |
+
+**Weighted Detection Rate: 76.0%** (24% of sophisticated attacks will be missed).
+
+## Project Structure
+
+```text
+├── main.py                     # MCP Server & Adaptive Integrity Tools
+├── database.py                 # Modular SQLite Persistence Layer
+├── consensus.py                # Multi-Agent Voting Engine
+├── agents.json                 # Agent Profiles & Metadata
+├── test_server.py              # Integration Test Suite (32+ Edge Cases)
+└── tests/
+    ├── test_behavioral_detection.py # Metric Validation & Gap Analysis
+    └── phase2_dashboard.py      # Dashboard Visualization Generator
+```
+
+## Setup & Operation
 
 ```bash
-pip install mcp fastmcp
-python main.py
-```
-
-Server runs on `http://0.0.0.0:8765/sse`
-
-## Tools
-
-| Tool | Description |
-|------|-------------|
-| `create_merchant_locked_card` | Create a virtual card locked to a specific merchant |
-| `get_receipts` | Generate fake receipts for a customer email |
-| `execute_with_consensus` | Execute a transaction with multi-agent voting |
-| `get_fraud_score` | Get basic fraud risk score |
-| `score_payment_risk` | Detailed risk assessment with recommendation |
-| `get_agent_status` | Check health status of consensus agents |
-
-## Fraud Scoring
-
-```
-Score = Amount (0-40) + Time (0-30) + Merchant (0-30) + Anomaly (0-25)
-```
-
-| Range | Level | Recommendation |
-|-------|-------|----------------|
-| < 30 | LOW | Auto-approve |
-| 30-60 | MEDIUM | Manual review |
-| > 60 | HIGH | Block |
-
-### Anomaly Detection
-If amount > 20x typical bill for merchant, +25 points added.
-
-## Consensus Voting
-
-| Amount | Threshold | Agents Required |
-|--------|-----------|-----------------|
-| < $100 | Auto-approve | None |
-| $100-$1000 | 67% | 2 of 3 |
-| > $1000 | 80% | 3 of 3 |
-
-### Agents
-
-| Agent | Role | Voting Rule |
-|-------|------|-------------|
-| Finance Agent | Primary Approver | Approves if ≤ $10,000 |
-| Compliance Agent | Secondary Approver | Reviews unknown merchants |
-| Audit Agent | Reviewer | Reviews amounts > $500 |
-
-## Files
-
-```
-├── main.py           # MCP server with all tools
-├── consensus.py      # ConsensusEngine class
-├── agents.json       # Agent configuration
-├── payments.db       # SQLite database
-└── test_server.py    # Comprehensive test suite
-```
-
-## Testing
-
-```bash
-# Start server
+# Start the simulation server
 python main.py
 
-# Run tests (in another terminal)
-python test_server.py
+# Run Phase 2 Metric Validation
+python tests/test_behavioral_detection.py
+
+# Generate Performance Dashboard
+python tests/phase2_dashboard.py
 ```
+
+## Project Standards
+This project adheres to high technical standards:
+- **Type Safety**: Comprehensive PEP 484 type hinting.
+- **Documentation**: Google-style docstrings for all entities.
+- **Persistence**: Safe SQLite management with thread-local storage.
 
 ## License
-
 MIT
