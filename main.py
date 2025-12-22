@@ -37,6 +37,18 @@ def init_db():
         )
     """)
     
+    # Create agent_behavior table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS agent_behavior (
+            agent_id TEXT,
+            transaction_id TEXT,
+            vote TEXT,
+            amount REAL,
+            timestamp TIMESTAMP,
+            PRIMARY KEY (agent_id, transaction_id)
+        )
+    """)
+    
     conn.commit()
     conn.close()
 
@@ -177,6 +189,17 @@ async def execute_with_consensus(amount: float, merchant: str) -> str:
         if review_agents:
             details.append(f"Review: {', '.join(review_agents)}")
         agent_details = " | ".join(details)
+        
+        # Log each agent vote to agent_behavior table
+        conn = sqlite3.connect("payments.db")
+        cursor = conn.cursor()
+        for vote in result["votes"]:
+            cursor.execute(
+                "INSERT INTO agent_behavior (agent_id, transaction_id, vote, amount, timestamp) VALUES (?, ?, ?, ?, ?)",
+                (vote["agent_id"], tx_id, vote["vote"].upper(), amount, datetime.now().isoformat())
+            )
+        conn.commit()
+        conn.close()
     
     # Save to database if approved
     if status == "approved":
@@ -319,6 +342,12 @@ Reason: {result['reason']}
 Recommendation: {recommendation}"""
 
 
+# Example Prompts for Claude
+# - Create $100 card for Amazon.
+# - $5,000 to 'sketchy.com' at 3 AM
+# - Execute $750 payment to Netflix.
+
+
 @mcp.tool()
 async def get_agent_status() -> str:
     """
@@ -345,6 +374,92 @@ async def get_agent_status() -> str:
         lines.append("")
     
     return "\n".join(lines)
+
+
+def _calculate_baseline(agent_id: str) -> dict:
+    """
+    Internal helper to calculate behavioral baseline for an agent.
+    
+    Args:
+        agent_id: The agent's identifier.
+    
+    Returns:
+        A dict with 'mean' and 'stddev' of amounts the agent has approved.
+    """
+    conn = sqlite3.connect("payments.db")
+    cursor = conn.cursor()
+    
+    # Get all approved amounts for this agent (SQLite lacks native STDDEV)
+    cursor.execute(
+        "SELECT amount FROM agent_behavior WHERE agent_id = ? AND vote = 'APPROVE'",
+        (agent_id,)
+    )
+    rows = cursor.fetchall()
+    conn.close()
+    
+    if not rows:
+        return {"mean": 0.0, "stddev": 0.0}
+    
+    amounts = [row[0] for row in rows]
+    n = len(amounts)
+    
+    # Calculate mean
+    mean = sum(amounts) / n
+    
+    # Calculate standard deviation (need at least 2 samples)
+    if n < 2:
+        stddev = 0.0
+    else:
+        variance = sum((x - mean) ** 2 for x in amounts) / (n - 1)
+        stddev = variance ** 0.5
+    
+    return {
+        "mean": mean,
+        "stddev": stddev
+    }
+
+
+@mcp.tool()
+async def get_behavioral_baseline(agent_id: str) -> dict:
+    """
+    Get the behavioral baseline for an agent based on their approval history.
+    
+    Args:
+        agent_id: The agent's identifier.
+    
+    Returns:
+        A dict with 'mean' and 'stddev' of amounts the agent has approved.
+    """
+    return _calculate_baseline(agent_id)
+
+
+@mcp.tool()
+async def should_revoke_agent(agent_id: str, current_vote_amount: float) -> str:
+    """
+    Determine if an agent should be revoked based on behavioral drift.
+    
+    Args:
+        agent_id: The agent's identifier.
+        current_vote_amount: The amount of the current transaction being voted on.
+    
+    Returns:
+        'REVOKE' if drift exceeds 2x stddev, 'HOLD' if not enough data, 'APPROVE' otherwise.
+    """
+    baseline = _calculate_baseline(agent_id)
+    
+    mean = baseline["mean"]
+    stddev = baseline["stddev"]
+    
+    # Not enough data to make a decision
+    if stddev == 0:
+        return "HOLD"
+    
+    drift = abs(current_vote_amount - mean)
+    
+    if drift > 2.0 * stddev:
+        return "REVOKE"
+    
+    return "APPROVE"
 
 
 if __name__ == "__main__":

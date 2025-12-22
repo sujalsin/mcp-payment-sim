@@ -24,3 +24,21 @@
 - Features: amount_percentile, time_anomaly, merchant_reputation
 - Weights: 0.4, 0.3, 0.3
 - Output: 0-100 score, threshold at 70
+
+
+---
+
+## Phase 1: Naive Behavioral Baseline + Auto-Revocation (2 hours)
+
+**Objective**: Ship simplest possible behavioral tracker with intentional flaws.
+
+### Implementation
+```python
+# Add to main.py
+1. CREATE TABLE agent_behavior (
+       agent_id TEXT, transaction_id TEXT, vote TEXT, 
+       amount REAL, timestamp TIMESTAMP
+   )
+2. In execute_with_consensus(): Log each vote to agent_behavior
+3. New tool: get_behavioral_baseline(agent_id) → returns mean, stddev
+4. New tool: should_revoke_agent(agent_id, amount) → "REVOKE" if drift > 2*stddev
