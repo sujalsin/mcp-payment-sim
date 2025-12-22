@@ -126,6 +126,7 @@ async def execute_with_consensus(amount: float, merchant: str) -> str:
                 f"Merchant: {merchant}\n"
                 f"Status: {status.upper()}\n"
                 f"Consensus: Auto-approved (amount < $100)\n"
+                f"Agents: N/A\n"
                 f"Details: Threshold bypass")
 
     # Integrity Check & Revocation
@@ -189,7 +190,7 @@ async def execute_with_consensus(amount: float, merchant: str) -> str:
             f"Merchant: {merchant}\n"
             f"Status: {status.upper()}\n"
             f"Consensus: {result['approval_rate']*100:.0f}% approval (Threshold: {result['required_threshold']*100:.0f}%)\n"
-            f"Details:\n{chr(10).join(revocation_log + agent_reports)}")
+            f"Agents:\n{chr(10).join(revocation_log + agent_reports)}")
 
 
 def _calculate_fraud_score(amount: float, merchant: str, hour: int) -> Dict[str, Any]:
@@ -355,7 +356,6 @@ async def get_exponential_baseline(agent_id: str, decay: float = 0.9) -> Dict[st
     ewma = weighted_sum / weight_total if weight_total > 0 else 0.0
     
     return {"ewma": round(ewma, 2), "sample_count": len(amounts)}
-
 
 async def _get_model_weight_hash(agent_id: str) -> str:
     """Internal implementation for getting model weight hash."""
@@ -549,7 +549,6 @@ async def evaluate_agent_integrity(
 #         return "REVOKE"
 #     
 #     return "APPROVE"
-
 
 @mcp.tool()
 async def get_compromised_agents() -> str:

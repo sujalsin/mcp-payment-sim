@@ -62,19 +62,34 @@ A sophisticated attacker can gradually shift agent behavior (e.g., a 1.004x mult
 
 ## Setup & Operation
 
+### Prerequisites
+- Python 3.10+
+- `mcp` (FastMCP framework)
+
+### Quick Start
 ```bash
+# Install dependencies
+pip install mcp fastmcp
+
 # Start the simulation server
 python main.py
+```
 
+### Verification
+```bash
 # Run Phase 2 Metric Validation
 python tests/test_behavioral_detection.py
 
 # Generate Performance Dashboard
 python tests/phase2_dashboard.py
+
+# Run the integration test suite
+python test_server.py
 ```
 
 ## Project Standards
 This project adheres to high technical standards:
+- **Modularity**: Strict separation of concerns between storage, logic, and interface.
 - **Type Safety**: Comprehensive PEP 484 type hinting.
 - **Documentation**: Google-style docstrings for all entities.
 - **Persistence**: Safe SQLite management with thread-local storage.

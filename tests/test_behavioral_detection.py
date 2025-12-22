@@ -19,6 +19,8 @@ def get_mock_hash(agent_id: str, tampered: bool = False) -> str:
     Returns:
         A SHA-256 hash string of the agent's simulated model weights.
     """
+    version = "v1.3" if not tampered else "v1.3-TAMPERED"
+    return hashlib.sha256(f"{agent_id}-model-{version}".encode()).hexdigest()
 
 
 def simulate_ewma_baseline(amounts: list, decay: float = 0.9) -> float:
@@ -683,6 +685,7 @@ def calculate_realistic_production_metrics():
         'poison_detection': poison_rate,
         'weighted_detection': weighted_detection
     }
+
 
 
 if __name__ == "__main__":
