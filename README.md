@@ -1,85 +1,79 @@
 # MCP Payments Simulator
 
-Built to prototype agentic payment infrastructure with multi-agent consensus and fraud scoring.
+A high-fidelity prototype of agentic payment infrastructure, featuring multi-agent consensus voting, behavioral fingerprinting, and risk-based fraud scoring.
 
-## Architecture
+## Overview
 
-- **MCP Server**: 7 tools accessible via Claude
-- **Consensus Engine**: 3-agent Byzantine voting (67%/80% threshold based on amount)
-- **Fraud Detection**: Rule-based scoring (amount/time/merchant/anomaly)
-- **Storage**: SQLite for mandates and transactions
+The **MCP Payments Simulator** is designed to demonstrate robust, multi-agent evaluation of financial transactions. It utilizes the Model Context Protocol (MCP) to expose a suite of tools for transaction execution, risk assessment, and behavioral monitoring.
 
-## Quick Start
+## System Architecture
 
+### 1. Model Context Protocol (MCP) Tier
+Exposes 7 professional tools for lifecycle management of virtual cards, transaction history retrieval, and consensus-driven execution.
+
+### 2. Multi-Agent Consensus Tier
+Implements a Byzantine-resistant voting mechanism using three specialized agents:
+- **Finance Agent**: Primary approver for liquidity and budget adherence.
+- **Compliance Agent**: Secondary approver for merchant reputation and regulatory checks.
+- **Audit Agent**: Specialized reviewer for high-value or unusual patterns.
+
+**Voting Logic:**
+- **Auto-approve**: Transactions < $100.
+- **Standard Majority (2/3)**: Transactions $100 - $1,000.
+- **Supermajority (3/3)**: Transactions > $1,000.
+
+### 3. Behavioral Fingerprinting (Layer 4)
+Maintains a 2-sigma behavioral baseline for agents. If an agent's voting behavior (amount approved) drifts more than two standard deviations from their historical mean, they are flagged for revocation.
+
+### 4. Fraud Scoring Engine
+A multi-dimensional scoring algorithm (0-100) based on:
+- **Velocity & Amount**: Transaction size relative to limits.
+- **Temporal Analysis**: UTC hour assessment (high risk during late-night hours).
+- **Merchant Reputation**: Validation against known healthy merchants.
+- **Anomaly Detection**: 20x deviation from typical merchant bill size.
+
+## Project Structure
+
+```text
+├── main.py           # MCP Server & Tool Definitions
+├── database.py       # Modular SQLite Persistence Layer
+├── consensus.py      # Multi-Agent Voting Engine
+├── agents.json       # Agent Profiles & Metadata
+├── test_server.py    # Integration Test Suite (32+ Edge Cases)
+├── test_behavioral.py # Behavioral Logic Verification
+└── tests/            # Visualization & Phase Analysis
+```
+
+## Setup & Operation
+
+### Prerequisites
+- Python 3.10+
+- `mcp` (FastMCP framework)
+
+### Quick Start
 ```bash
+# Install dependencies
 pip install mcp fastmcp
+
+# Start the simulation server
 python main.py
 ```
 
-Server runs on `http://0.0.0.0:8765/sse`
-
-## Tools
-
-| Tool | Description |
-|------|-------------|
-| `create_merchant_locked_card` | Create a virtual card locked to a specific merchant |
-| `get_receipts` | Generate fake receipts for a customer email |
-| `execute_with_consensus` | Execute a transaction with multi-agent voting |
-| `get_fraud_score` | Get basic fraud risk score |
-| `score_payment_risk` | Detailed risk assessment with recommendation |
-| `get_agent_status` | Check health status of consensus agents |
-
-## Fraud Scoring
-
-```
-Score = Amount (0-40) + Time (0-30) + Merchant (0-30) + Anomaly (0-25)
-```
-
-| Range | Level | Recommendation |
-|-------|-------|----------------|
-| < 30 | LOW | Auto-approve |
-| 30-60 | MEDIUM | Manual review |
-| > 60 | HIGH | Block |
-
-### Anomaly Detection
-If amount > 20x typical bill for merchant, +25 points added.
-
-## Consensus Voting
-
-| Amount | Threshold | Agents Required |
-|--------|-----------|-----------------|
-| < $100 | Auto-approve | None |
-| $100-$1000 | 67% | 2 of 3 |
-| > $1000 | 80% | 3 of 3 |
-
-### Agents
-
-| Agent | Role | Voting Rule |
-|-------|------|-------------|
-| Finance Agent | Primary Approver | Approves if ≤ $10,000 |
-| Compliance Agent | Secondary Approver | Reviews unknown merchants |
-| Audit Agent | Reviewer | Reviews amounts > $500 |
-
-## Files
-
-```
-├── main.py           # MCP server with all tools
-├── consensus.py      # ConsensusEngine class
-├── agents.json       # Agent configuration
-├── payments.db       # SQLite database
-└── test_server.py    # Comprehensive test suite
-```
-
-## Testing
-
+### Verification
 ```bash
-# Start server
-python main.py
-
-# Run tests (in another terminal)
+# Run the integration test suite
 python test_server.py
+
+# Run the behavioral analysis suite
+python test_behavioral.py
 ```
+
+## Technical Standards
+This project adheres to senior engineering standards, including:
+- **Modularity**: Strict separation of concerns between storage, logic, and interface.
+- **Type Safety**: Comprehensive PEP 484 type hinting.
+- **Documentation**: Google-style docstrings for all public and private entities.
+- **Persistence**: Safe SQLite connection management via context managers.
 
 ## License
-
 MIT
