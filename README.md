@@ -30,7 +30,7 @@ To mitigate the **Rigidity Problem** of static baselines (where legitimate evolu
 
 Phase 2 significantly improves detection accuracy and reduces operational noise.
 
-![Phase 2 Metrics Dashboard](file:///home/sujals2144/natural/tests/phase2_metrics_dashboard.png)
+![Phase 2 Metrics Dashboard](tests/phase2_metrics_dashboard.png)
 
 ## Research Gap: Temporal Poisoning
 
